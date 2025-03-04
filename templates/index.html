@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Semester Fees Payment System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="login-container" id="login-container">
+            <h1 class="glowing">Online Semester Fees Payment System</h1>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('student')">Student Login</button>
+                <button class="tab-btn" onclick="switchTab('admin')">Admin Login</button>
+            </div>
+            
+            <!-- Student Login Form -->
+            <div class="form-container active" id="student-form">
+                <h2>Student Login</h2>
+                <form id="student-login-form">
+                    <div class="input-group">
+                        <label for="student-id">Student ID</label>
+                        <input type="text" id="student-id" name="student-id" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="student-password">Password</label>
+                        <input type="password" id="student-password" name="student-password" required>
+                    </div>
+                    <button type="submit" class="btn-login">Login</button>
+                </form>
+                <p class="error-message" id="student-error"></p>
+            </div>
+            
+            <!-- Admin Login Form -->
+            <div class="form-container" id="admin-form">
+                <h2>Admin Login</h2>
+                <form id="admin-login-form">
+                    <div class="input-group">
+                        <label for="admin-id">Admin ID</label>
+                        <input type="text" id="admin-id" name="admin-id" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="admin-password">Password</label>
+                        <input type="password" id="admin-password" name="admin-password" required>
+                    </div>
+                    <button type="submit" class="btn-login">Login</button>
+                </form>
+                <p class="error-message" id="admin-error"></p>
+            </div>
+        </div>
+        
+        <!-- Student Dashboard (hidden initially) -->
+        <div class="dashboard-container hidden" id="student-dashboard">
+            <div class="dashboard-header">
+                <h2>Student Dashboard</h2>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+            <div class="student-info">
+                <h3>Student Information</h3>
+                <div id="student-details"></div>
+            </div>
+            <div class="fees-section">
+                <h3>Semester Fees</h3>
+                <div id="pending-fees"></div>
+                <div id="payment-history"></div>
+            </div>
+            <div class="payment-section">
+                <h3>Make Payment</h3>
+                <form id="payment-form">
+                    <div class="input-group">
+                        <label for="fee-type">Fee Type</label>
+                        <select id="fee-type" name="fee-type" required>
+                            <option value="">Select Fee Type</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="amount">Amount</label>
+                        <input type="number" id="amount" name="amount" readonly>
+                    </div>
+                    <div class="input-group">
+                        <label for="payment-method">Payment Method</label>
+                        <select id="payment-method" name="payment-method" required>
+                            <option value="">Select Payment Method</option>
+                            <option value="credit-card">Credit Card</option>
+                            <option value="debit-card">Debit Card</option>
+                            <option value="net-banking">Net Banking</option>
+                            <option value="upi">UPI</option>
+                        </select>
+                    </div>
+                    <div id="payment-details"></div>
+                    <button type="submit" class="btn-pay">Pay Now</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Admin Dashboard (hidden initially) -->
+        <div class="dashboard-container hidden" id="admin-dashboard">
+            <div class="dashboard-header">
+                <h2>Admin Dashboard</h2>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+            <div class="admin-controls">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchAdminTab('students')">Manage Students</button>
+                    <button class="tab-btn" onclick="switchAdminTab('fees')">Manage Fees</button>
+                    <button class="tab-btn" onclick="switchAdminTab('payments')">Payment Records</button>
+                </div>
+                
+                <!-- Manage Students Tab -->
+                <div class="admin-tab active" id="students-tab">
+                    <h3>Student Management</h3>
+                    <div class="search-section">
+                        <input type="text" id="student-search" placeholder="Search by ID or Name">
+                        <button onclick="searchStudents()">Search</button>
+                        <button onclick="showAddStudentForm()">Add New Student</button>
+                    </div>
+                    <div id="student-list"></div>
+                    <div id="add-student-form" class="hidden">
+                        <h4>Add New Student</h4>
+                        <form id="new-student-form">
+                            <div class="input-group">
+                                <label for="new-student-id">Student ID</label>
+                                <input type="text" id="new-student-id" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="new-student-name">Full Name</label>
+                                <input type="text" id="new-student-name" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="new-student-email">Email</label>
+                                <input type="email" id="new-student-email" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="new-student-course">Course</label>
+                                <input type="text" id="new-student-course" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="new-student-password">Password</label>
+                                <input type="password" id="new-student-password" required>
+                            </div>
+                            <div class="buttons">
+                                <button type="submit" class="btn-add">Add Student</button>
+                                <button type="button" class="btn-cancel" onclick="hideAddStudentForm()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Manage Fees Tab -->
+                <div class="admin-tab" id="fees-tab">
+                    <h3>Fee Management</h3>
+                    <div class="fee-controls">
+                        <button onclick="showAddFeeForm()">Add New Fee Type</button>
+                    </div>
+                    <div id="fee-types-list"></div>
+                    <div id="add-fee-form" class="hidden">
+                        <h4>Add New Fee Type</h4>
+                        <form id="new-fee-form">
+                            <div class="input-group">
+                                <label for="fee-name">Fee Name</label>
+                                <input type="text" id="fee-name" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="fee-amount">Amount</label>
+                                <input type="number" id="fee-amount" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="fee-semester">Semester</label>
+                                <select id="fee-semester" required>
+                                    <option value="">Select Semester</option>
+                                    <option value="1">Semester 1</option>
+                                    <option value="2">Semester 2</option>
+                                    <option value="3">Semester 3</option>
+                                    <option value="4">Semester 4</option>
+                                    <option value="5">Semester 5</option>
+                                    <option value="6">Semester 6</option>
+                                    <option value="7">Semester 7</option>
+                                    <option value="8">Semester 8</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label for="fee-deadline">Deadline</label>
+                                <input type="date" id="fee-deadline" required>
+                            </div>
+                            <div class="buttons">
+                                <button type="submit" class="btn-add">Add Fee</button>
+                                <button type="button" class="btn-cancel" onclick="hideAddFeeForm()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Payment Records Tab -->
+                <div class="admin-tab" id="payments-tab">
+                    <h3>Payment Records</h3>
+                    <div class="filter-section">
+                        <div class="input-group">
+                            <label for="filter-date-from">From Date</label>
+                            <input type="date" id="filter-date-from">
+                        </div>
+                        <div class="input-group">
+                            <label for="filter-date-to">To Date</label>
+                            <input type="date" id="filter-date-to">
+                        </div>
+                        <div class="input-group">
+                            <label for="filter-status">Payment Status</label>
+                            <select id="filter-status">
+                                <option value="all">All</option>
+                                <option value="success">Success</option>
+                                <option value="pending">Pending</option>
+                                <option value="failed">Failed</option>
+                            </select>
+                        </div>
+                        <button onclick="filterPayments()">Apply Filters</button>
+                        <button onclick="resetFilters()">Reset</button>
+                    </div>
+                    <div id="payment-records"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
